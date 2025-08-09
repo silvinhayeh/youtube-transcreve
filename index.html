@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transcrição YouTube</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    pre {
+      text-align: left;
+      white-space: pre-wrap;
+      background: white;
+      padding: 15px;
+      border-radius: 5px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Transcrever Vídeo do YouTube</h1>
+  <input type="text" id="videoUrl" placeholder="Cole o link do vídeo aqui" />
+  <br />
+  <button onclick="getTranscription()">Gerar Transcrição</button>
+  <button onclick="downloadTXT()">Baixar TXT</button>
+  <pre id="output"></pre>
+
+  <script>
+    async function getTranscription() {
+      const url = document.getElementById("videoUrl").value;
+      if (!url) {
+        alert("Cole o link do vídeo!");
+        return;
+      }
+      document.getElementById("output").textContent = "Processando...";
+      try {
+        const res = await fetch(`/api/transcribe?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
+        if (data.error) {
+          document.getElementById("output").textContent = "Erro: " + data.error;
+        } else {
+          document.getElementById("output").textContent = data.text;
+        }
+      } catch (err) {
+        document.getElementById("output").textContent = "Erro ao buscar transcrição.";
+      }
+    }
+
+    function downloadTXT() {
+      const text = document.getElementById("output").textContent;
+      if (!text) {
+        alert("Nenhuma transcrição disponível!");
+        return;
+      }
+      const blob = new Blob([text], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "transcricao.txt";
+      link.click();
+    }
+  </script>
+</body>
+</html>
